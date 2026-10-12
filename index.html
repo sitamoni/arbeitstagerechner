@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b6e5c">
+<meta name="description" content="Arbeitstage und Feiertage aller Bundesländer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arbeitstage">
+<title>Arbeitstage Deutschland</title>
+<style>
+:root{--bg:#f3f6f4;--card:#fff;--ink:#16302b;--mut:#5d7570;--line:#d5e0dc;--acc:#0b6e5c;--hol:#c8553d;--soft:#e4f1ed}
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10201d;--card:#172b27;--ink:#e6f1ee;--mut:#9ab3ad;--line:#2a443f;--acc:#5fd0b8;--hol:#ee8a72;--soft:#1f3a34}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#10201d;--card:#172b27;--ink:#e6f1ee;--mut:#9ab3ad;--line:#2a443f;--acc:#5fd0b8;--hol:#ee8a72;--soft:#1f3a34}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Segoe UI",system-ui,sans-serif;padding:16px;max-width:1500px;margin-inline:auto}
+h1{font-size:1.5rem;margin:0}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:.2rem 0 1rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:.85rem;padding:6px 12px;border:0;background:var(--card);color:var(--mut);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--bg);font-weight:600}
+h2{font-size:1.1rem;margin:0 0 .7rem}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mut);gap:4px}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:.95rem}
+select,input[type=date]{font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.kpi div{flex:1 1 120px;background:var(--soft);border-radius:8px;padding:10px}
+.kpi b{display:block;font-size:1.7rem;color:var(--acc)}
+.kpi span{font-size:.8rem;color:var(--mut)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600}
+td.n,th.n{text-align:center;font-variant-numeric:tabular-nums;width:64px}
+td.nw{white-space:nowrap}
+.q{color:var(--mut);font-style:italic;margin-top:2px}
+.qr{display:flex;align-items:center;gap:10px;margin-top:6px}
+.em{font-size:1.5rem;line-height:1;font-style:normal}
+.nr{display:inline-block;min-width:34px;text-align:center;padding:5px 8px;border-radius:8px;background:var(--soft);color:var(--acc);font-weight:700;font-size:1.05rem}
+.nr.hn{background:transparent;color:var(--hol)}
+tr.hol td{background:color-mix(in srgb,var(--hol) 9%,transparent)}
+.we{color:var(--mut)}
+.tag{font-size:.75rem;border:1px solid var(--hol);color:var(--hol);border-radius:10px;padding:1px 7px}
+.note{font-size:.8rem;color:var(--mut);margin:.6rem 0 0}
+#regs{display:flex;flex-wrap:wrap;gap:12px}
+button{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--acc)}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.today{margin-top:4px;color:var(--mut)}
+.today b{color:var(--ink);margin-right:6px}
+.col{display:flex;flex-direction:column;gap:12px}
+main.grid{display:grid;gap:14px;grid-template-columns:minmax(230px,1fr) minmax(320px,1.5fr) minmax(280px,1.2fr);align-items:start}
+main.grid section{margin-bottom:0}
+#right{display:flex;flex-direction:column;gap:14px}
+.scroll{margin-top:12px}
+@media (min-width:821px){.scroll{max-height:calc(100vh - 300px);min-height:260px;overflow:auto}}
+@media (max-width:820px){main.grid{grid-template-columns:1fr}#s-month{order:-1}}
+thead th{position:sticky;top:0;background:var(--card);z-index:1}
+tr.today td{background:var(--soft)}
+tr.today td:first-child{box-shadow:inset 3px 0 var(--acc)}
+.tag.ok{color:var(--acc);border-color:var(--acc)}
+.tag.we{color:var(--mut);border-color:var(--mut)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Arbeitstage in Deutschland</h1>
+    <div class="today" id="today"></div>
+  </div>
+  <div class="bar">
+    <label>Bundesland <select id="state"></select></label>
+    <label>Jahr <select id="year"></select></label>
+    <div id="regs"></div>
+    <div class="seg" role="group" aria-label="Darstellung">
+      <button type="button" data-t="system" aria-pressed="true">System</button>
+      <button type="button" data-t="light" aria-pressed="false">Hell</button>
+      <button type="button" data-t="dark" aria-pressed="false">Dunkel</button>
+    </div>
+  </div>
+</header>
+
+<main class="grid">
+  <section id="s-range">
+    <h2>Zeitraum berechnen</h2>
+    <div class="col">
+      <label>Von <input type="date" id="from"></label>
+      <label>Bis <input type="date" id="to"></label>
+      <label class="chk"><input type="checkbox" id="incl" checked> Start- und Endtag zählen</label>
+    </div>
+    <div class="kpi" id="rkpi"></div>
+  </section>
+
+  <section id="s-month">
+    <h2>Monat: <span id="mtitle"></span></h2>
+    <div class="row">
+      <button type="button" id="prev" aria-label="Vorheriger Monat">◀</button>
+      <label>Monat <select id="month"></select></label>
+      <button type="button" id="next" aria-label="Nächster Monat">▶</button>
+      <button type="button" id="tod">Heute</button>
+    </div>
+    <div class="kpi" id="mkpi"></div>
+    <div class="wrap scroll" id="mscroll"><table id="days"></table></div>
+  </section>
+
+  <div id="right">
+    <section>
+      <h2>Feiertage</h2>
+      <div class="wrap"><table id="hols"></table></div>
+    </section>
+    <section>
+      <h2>Jahresübersicht</h2>
+      <div class="kpi" id="kpi"></div>
+      <p class="note">Arbeitstage = Montag bis Freitag ohne gesetzliche Feiertage des gewählten Bundeslandes. Regionale Feiertage schaltest du oben über die Kästchen zu.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const MON=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const WD=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const STATES={BW:"Baden-Württemberg",BY:"Bayern",BE:"Berlin",BB:"Brandenburg",HB:"Bremen",HH:"Hamburg",HE:"Hessen",MV:"Mecklenburg-Vorpommern",NI:"Niedersachsen",NW:"Nordrhein-Westfalen",RP:"Rheinland-Pfalz",SL:"Saarland",SN:"Sachsen",ST:"Sachsen-Anhalt",SH:"Schleswig-Holstein",TH:"Thüringen"};
+const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const add=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const fmt=d=>String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();
+
+function easter(y){
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),
+  g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,
+  l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+  mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,da);
+}
+/* s = Bundesländer, in denen der Tag gilt; ohne s = bundesweit */
+const HOL=[
+ {n:"Neujahr",d:y=>new Date(y,0,1)},
+ {n:"Heilige Drei Könige",d:y=>new Date(y,0,6),s:["BW","BY","ST"]},
+ {n:"Internationaler Frauentag",d:y=>new Date(y,2,8),s:["BE","MV"]},
+ {n:"Karfreitag",d:(y,o)=>add(o,-2)},
+ {n:"Ostersonntag",d:(y,o)=>o,s:["BB"]},
+ {n:"Ostermontag",d:(y,o)=>add(o,1)},
+ {n:"Tag der Arbeit",d:y=>new Date(y,4,1)},
+ {n:"Christi Himmelfahrt",d:(y,o)=>add(o,39)},
+ {n:"Pfingstsonntag",d:(y,o)=>add(o,49),s:["BB"]},
+ {n:"Pfingstmontag",d:(y,o)=>add(o,50)},
+ {n:"Fronleichnam",d:(y,o)=>add(o,60),s:["BW","BY","HE","NW","RP","SL"]},
+ {n:"Mariä Himmelfahrt",d:y=>new Date(y,7,15),s:["SL"]},
+ {n:"Weltkindertag",d:y=>new Date(y,8,20),s:["TH"]},
+ {n:"Tag der Deutschen Einheit",d:y=>new Date(y,9,3)},
+ {n:"Reformationstag",d:y=>new Date(y,9,31),s:["BB","HB","HH","MV","NI","SN","ST","SH","TH"]},
+ {n:"Allerheiligen",d:y=>new Date(y,10,1),s:["BW","BY","NW","RP","SL"]},
+ {n:"Buß- und Bettag",d:y=>{let x=new Date(y,10,22);while(x.getDay()!==3)x=add(x,-1);return x},s:["SN"]},
+ {n:"1. Weihnachtstag",d:y=>new Date(y,11,25)},
+ {n:"2. Weihnachtstag",d:y=>new Date(y,11,26)}
+];
+/* nur in einzelnen Gemeinden: per Kästchen zuschaltbar */
+const REG=[
+ {id:"mh",n:"Mariä Himmelfahrt",d:y=>new Date(y,7,15),s:["BY"],label:"Mariä Himmelfahrt (15.8.)",hint:"Gilt nur in Gemeinden mit überwiegend katholischer Bevölkerung",def:true},
+ {id:"fz",n:"Augsburger Friedensfest",d:y=>new Date(y,7,8),s:["BY"],label:"Augsburger Friedensfest (8.8.)",hint:"Gilt nur in Augsburg",def:false},
+ {id:"fl",n:"Fronleichnam",d:(y,o)=>add(o,60),s:["SN","TH"],label:"Fronleichnam (einzelne Gemeinden)",hint:"Gilt nur in einzelnen Gemeinden",def:false}
+];
+const regOn={};REG.forEach(r=>regOn[r.id]=r.def);
+
+const QUOTES=["Heute ist ein guter Tag, um etwas Gutes abzuschließen.","Kleine Schritte zählen – du bist schon unterwegs.","Ein ruhiger Start trägt oft am weitesten.","Du musst nicht perfekt sein, nur dranbleiben.","Eine Aufgabe nach der anderen – das reicht.","Was du heute anfängst, nimmt dir morgen Last ab.","Gute Arbeit entsteht Stück für Stück.","Atme durch, dann geht’s leichter.","Dein Einsatz von heute ist die Erleichterung von morgen.","Fang einfach an, der Rest ergibt sich.","Auch ein anstrengender Tag geht vorbei – und du gehst gestärkt daraus hervor.","Mach heute etwas, auf das du stolz sein kannst.","Ruhe bewahren und Schritt für Schritt vorgehen.","Du hast schon Schwierigeres geschafft.","Ein Lächeln am Morgen macht den Tag leichter.","Fokus auf das Wichtige, der Rest darf warten.","Heute zählt, was du anpackst.","Pausen gehören zur guten Arbeit dazu.","Ausdauer schlägt Eile.","Jeder erledigte Punkt ist ein Grund zur Freude.","Mit Neugier wird auch Routine spannend.","Deine Arbeit macht einen Unterschied.","Mut zum ersten Schritt, Vertrauen in den zweiten.","Zuversicht ist der beste Kaffee.","Der Tag gehört dir – gestalte ihn.","Gelassen bleiben, klar entscheiden.","Heute ein Stück näher an deinen Zielen.","Du bringst mehr mit, als du denkst.","Gemeinsam geht vieles leichter – frag um Hilfe, wenn du sie brauchst.","Aus „ich muss“ wird „ich darf“.","Konzentration ist eine Superkraft.","Fortschritt ist wichtiger als Perfektion.","Vertrau auf dein Können.","Ein guter Plan macht den Tag leicht.","Heute wächst du ein bisschen weiter.","Bleib freundlich, bleib dran.","Nach getaner Arbeit schmeckt der Feierabend besser.","Ein Schritt heute ist besser als zehn Pläne.","Mit Humor wird jede To-do-Liste kürzer.","Dein Tempo ist genau richtig.","Gib heute dein Bestes, mehr verlangt der Tag nicht.","Jeder Tag bringt eine neue Chance.","Du schaffst das – Stück für Stück.","Disziplin heute, Freiheit morgen.","Gute Laune ist ansteckend – verbreite sie."];
+
+const EMO=["🌞","👣","🌅","💪","✅","🌱","🧱","🍃","🎁","🚀","🌈","🏆","🧘","⛰️","😊","🎯","🔨","☕","🐢","🎉","🔍","🌍","🦋","🌻","🚗","🌊","🧭","🎒","🤝","🌸","🦸","📈","⭐","🗺️","🌳","🌼","🌇","🪜","😄","🚲","🥇","🍀","🏁","🔑","🎈"];
+
+function holidays(y){
+  const st=$("state").value,o=easter(y);
+  const L=HOL.filter(h=>!h.s||h.s.includes(st)).map(h=>({date:h.d(y,o),name:h.n,opt:false}));
+  REG.filter(r=>r.s.includes(st)&&regOn[r.id]).forEach(r=>L.push({date:r.d(y,o),name:r.n,opt:true}));
+  return L.sort((a,b)=>a.date-b.date);
+}
+function renderRegs(){
+  const st=$("state").value,box=$("regs");box.innerHTML="";
+  REG.filter(r=>r.s.includes(st)).forEach(r=>{
+    const l=document.createElement("label");l.className="chk";l.title=r.hint;
+    const c=document.createElement("input");c.type="checkbox";c.checked=regOn[r.id];
+    c.onchange=()=>{regOn[r.id]=c.checked;render()};
+    l.append(c," "+r.label);box.append(l);
+  });
+}
+function renderYear(){
+  const y=+$("year").value,H=holidays(y),set=new Set(H.map(h=>key(h.date)));
+  let wd=0,hd=0;
+  for(let d=new Date(y,0,1);d.getFullYear()===y;d=add(d,1)){const w=d.getDay();if(w>0&&w<6){wd++;if(set.has(key(d)))hd++;}}
+  const we=H.filter(h=>[0,6].includes(h.date.getDay())).length;
+  $("kpi").innerHTML=`<div><b>${wd-hd}</b><span>Arbeitstage</span></div><div><b>${hd}</b><span>Feiertage auf Mo–Fr</span></div><div><b>${H.length}</b><span>Feiertage gesamt</span></div><div><b>${we}</b><span>Feiertage am Wochenende</span></div>`;
+}
+function renderMonth(){
+  const y=+$("year").value,m=+$("month").value,H=holidays(y),map=new Map(H.map(h=>[key(h.date),h.name]));
+  const n=new Date(y,m+1,0).getDate();
+  let rows="",ad=0,hd=0;
+  for(let i=1;i<=n;i++){
+    const d=new Date(y,m,i),w=d.getDay();if(w===0||w===6)continue;
+    const hn=map.get(key(d)),head=`<b>${WD[w]}, ${fmt(d)}</b>`;
+    if(hn){hd++;rows+=`<tr class="hol${key(d)===key(today)?" today":""}"><td class="n"><span class="nr hn">–</span></td><td>${head} <span class="tag">Feiertag</span><div class="q">${hn}</div></td></tr>`}
+    else{ad++;const doy=Math.round((Date.UTC(y,m,i)-Date.UTC(y,0,0))/864e5);
+      const qi=(doy*7)%QUOTES.length;
+      rows+=`<tr${key(d)===key(today)?' class="today"':""}><td class="n"><span class="nr">${ad}</span></td><td>${head}<div class="q qr"><span class="em">${EMO[qi]}</span><span>${QUOTES[qi]}</span></div></td></tr>`}
+  }
+  $("mtitle").textContent=`${MON[m]} ${y}`;
+  $("mkpi").innerHTML=`<div><b>${ad}</b><span>Arbeitstage</span></div><div><b>${hd}</b><span>Feiertage auf Mo–Fr</span></div><div><b>${ad+hd}</b><span>Mo–Fr gesamt</span></div>`;
+  $("days").innerHTML=`<thead><tr><th class="n">Nr.</th><th>Arbeitstag und Motivation</th></tr></thead><tbody>${rows}</tbody>`;
+  const tr=$("days").querySelector("tr.today"),box=$("mscroll");
+  box.scrollTop=tr?Math.max(0,tr.offsetTop-box.clientHeight/3):0;
+}
+function renderHols(){
+  const H=holidays(+$("year").value);
+  $("hols").innerHTML=`<thead><tr><th>Datum</th><th>Tag</th><th>Feiertag</th></tr></thead><tbody>`+
+  H.map(h=>{const w=h.date.getDay(),wk=w===0||w===6;
+    return `<tr><td class="nw">${fmt(h.date)}</td><td class="${wk?"we":""}">${WD[w]}</td><td>${h.name} ${wk?'<span class="tag">Wochenende</span> ':""}${h.opt?'<span class="tag">regional</span>':""}</td></tr>`}).join("")+`</tbody>`;
+}
+function range(){
+  const f=$("from").value,t=$("to").value;
+  if(!f||!t){$("rkpi").innerHTML="";return}
+  let a=new Date(f+"T00:00"),b=new Date(t+"T00:00");
+  if(b<a){$("rkpi").innerHTML="<div><b>–</b><span>Das Enddatum liegt vor dem Startdatum</span></div>";return}
+  if(!$("incl").checked){a=add(a,1);b=add(b,-1)}
+  const sets={};let wd=0,hd=0,cal=0;
+  for(let d=a;d<=b;d=add(d,1)){cal++;const y=d.getFullYear();
+    sets[y]=sets[y]||new Set(holidays(y).map(h=>key(h.date)));
+    const w=d.getDay();if(w>0&&w<6){wd++;if(sets[y].has(key(d)))hd++;}}
+  $("rkpi").innerHTML=`<div><b>${wd-hd}</b><span>Arbeitstage</span></div><div><b>${hd}</b><span>Feiertage auf Mo–Fr</span></div><div><b>${wd}</b><span>Mo–Fr gesamt</span></div><div><b>${cal}</b><span>Kalendertage</span></div>`;
+}
+function render(){renderYear();renderMonth();renderHols();range();todayInfo()}
+
+Object.entries(STATES).forEach(([k,v])=>$("state").add(new Option(v,k,false,k==="BY")));
+let today=new Date();const now=today,cy=now.getFullYear();
+for(let y=cy-2;y<=cy+5;y++)$("year").add(new Option(y,y,false,y===cy));
+MON.forEach((m,i)=>$("month").add(new Option(m,i,false,i===now.getMonth())));
+$("from").value=key(now);$("to").value=key(add(now,30));
+$("state").addEventListener("change",()=>{renderRegs();render()});
+["year","month"].forEach(i=>$(i).addEventListener("change",render));
+["from","to","incl"].forEach(i=>$(i).addEventListener("change",range));
+renderRegs();render();
+
+function todayInfo(){
+  const d=today,w=d.getDay(),h=holidays(d.getFullYear()).find(x=>key(x.date)===key(d));
+  const st=h?`<span class="tag">Feiertag: ${h.name}</span>`:(w===0||w===6)?'<span class="tag we">Wochenende</span>':'<span class="tag ok">Arbeitstag</span>';
+  $("today").innerHTML=`<b>Heute: ${WD[w]}, ${fmt(d)}</b>${st}`;
+}
+function goMonth(dm){
+  let y=+$("year").value,m=+$("month").value+dm;
+  if(m<0){m=11;y--}else if(m>11){m=0;y++}
+  if(![...$("year").options].some(o=>+o.value===y))return;
+  $("year").value=y;$("month").value=m;render();
+}
+$("prev").onclick=()=>goMonth(-1);
+$("next").onclick=()=>goMonth(1);
+$("tod").onclick=()=>{$("year").value=today.getFullYear();$("month").value=today.getMonth();render()};
+/* Datumswechsel (Mitternacht, Ruhezustand) vom System übernehmen */
+function tick(){
+  const n=new Date();if(key(n)===key(today))return;
+  const was=today;today=n;
+  if(+$("year").value===was.getFullYear()&&+$("month").value===was.getMonth()){$("year").value=n.getFullYear();$("month").value=n.getMonth()}
+  render();
+}
+setInterval(tick,60000);window.addEventListener("focus",tick);
+
+function setTheme(t,save){
+  const r=document.documentElement;
+  if(t==="light"||t==="dark")r.setAttribute("data-theme",t);else{t="system";r.removeAttribute("data-theme")}
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===t)));
+  if(save){try{localStorage.setItem("theme",t)}catch(e){}}
+}
+let t0="system";try{t0=localStorage.getItem("theme")||"system"}catch(e){}
+setTheme(t0,false);
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>setTheme(b.dataset.t,true)));
+
+/* PWA: Offline-Speicher nur im Web (nicht beim Öffnen als Datei) */
+if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>

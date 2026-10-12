@@ -1,0 +1,11 @@
+Arbeitstage - Webseite mit PWA
+
+Dateien (alle zusammen in dasselbe Verzeichnis hochladen):
+  index.html, manifest.webmanifest, sw.js, icon.svg,
+  icon-192.png, icon-512.png, icon-512-maskable.png
+
+Lokal testen (Windows, PowerShell im Ordner):
+  python -m http.server 8000      dann http://localhost:8000 oeffnen
+  (Alternative: npx serve)
+
+Online: GitHub Pages (Repository oeffentlich, Branch main, Ordner / root).
